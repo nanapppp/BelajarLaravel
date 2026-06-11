@@ -292,7 +292,7 @@
                 <div class="amount-box">
                     <div class="amount-label">Total Pembayaran</div>
                     <div class="amount-value">
-                        <span>Rp</span> {{ number_format($order->total_price,0,',','.') }}
+                        <span>Rp</span> {{ number_format($order->total, 0, ',', '.') }}
                     </div>
                 </div>
 
@@ -316,7 +316,7 @@
             </div>
             <div class="step-item">
                 <div class="step-num">3</div>
-                <div class="step-text">Arahkan kamera ke QR Code di atas, pastikan nominal sesuai: <strong>Rp {{ number_format($order->total_price,0,',','.') }}</strong></div>
+                <div class="step-text">Arahkan kamera ke QR Code di atas, pastikan nominal sesuai: <strong>Rp {{ number_format($order->total, 0, ',', '.') }}</strong></div>
             </div>
             <div class="step-item">
                 <div class="step-num">4</div>
@@ -341,25 +341,30 @@
         <div class="summary-card">
             <div class="summary-head"><i class="fas fa-receipt me-1"></i>Ringkasan Pesanan</div>
             <div class="summary-body">
+                
+                {{-- PERBAIKAN: Berhasil Menggunakan Relasi 'items' bawaan Model --}}
                 @foreach($order->items as $item)
                 <div class="sum-row">
-                    <span>{{ $item->product->name ?? 'Produk' }} <span style="color:#a0aec0">x{{ $item->quantity }}</span></span>
-                    <span>Rp {{ number_format($item->price * $item->quantity,0,',','.') }}</span>
+                    <span>{{ $item->product->name ?? 'Produk dihapus' }} <span style="color:#a0aec0">x{{ $item->quantity }}</span></span>
+                    <span>Rp {{ number_format(($item->product->harga ?? 0) * $item->quantity, 0, ',', '.') }}</span>
                 </div>
                 @endforeach
+                
                 <div class="sum-row">
                     <span>Ongkos Kirim</span>
-                    <span>{{ $order->shipping_cost > 0 ? 'Rp '.number_format($order->shipping_cost,0,',','.') : 'Gratis' }}</span>
+                    <span>{{ ($order->shipping_cost ?? 0) > 0 ? 'Rp '.number_format($order->shipping_cost,0,',','.') : 'Gratis' }}</span>
                 </div>
-                @if(($order->discount??0)>0)
+                
+                @if(($order->discount ?? 0) > 0)
                 <div class="sum-row" style="color:#38a169">
                     <span>Diskon</span>
                     <span>-Rp {{ number_format($order->discount,0,',','.') }}</span>
                 </div>
                 @endif
+                
                 <div class="sum-row total">
                     <span>Total</span>
-                    <span>Rp {{ number_format($order->total_price,0,',','.') }}</span>
+                    <span>Rp {{ number_format($order->total, 0, ',', '.') }}</span>
                 </div>
             </div>
         </div>
@@ -404,7 +409,7 @@
 
         {{-- Already paid? --}}
         @if($order->payment_status === 'paid')
-        <div class="alert alert-success d-flex align-items-center gap-2">
+        <div class="alert alert-success d-flex align-items-center gap-2 mt-3">
             <i class="fas fa-check-circle fa-lg"></i>
             <div>
                 <strong>Pembayaran Dikonfirmasi!</strong><br>
@@ -423,8 +428,7 @@
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script>
 // Generate QR Code
-// Di production, ganti string ini dengan QRIS string asli dari payment gateway
-const qrisString = "000201010211{{ config('app.qris_merchant_id','NANAP0001') }}5204999953033605405{{ $order->total_price }}5802ID5909NanapShop6007Jakarta6105121206304{{ str_pad($order->id,4,'0') }}";
+const qrisString = "000201010211{{ config('app.qris_merchant_id','NANAP0001') }}5204999953033605405{{ $order->total }}5802ID5909NanapShop6007Jakarta6105121206304{{ str_pad($order->id,4,'0') }}";
 
 new QRCode(document.getElementById("qr-canvas"), {
     text: qrisString,
