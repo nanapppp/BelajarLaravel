@@ -7,9 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class Order extends Model
 {
     protected $fillable = [
-        'id',
+        'user_id',
         'tanggal',
-        'total'
+        'total',
+        'status',
+        'payment_status',
+        'payment_proof'
     ];
 
     public function details()
@@ -18,8 +21,7 @@ class Order extends Model
     }
 
     public function items()
-{
-    return $this->hasMany(DetailOrder::class);
-}
-
+    {
+        return $this->hasMany(DetailOrder::class);
+    }
 }

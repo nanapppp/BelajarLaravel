@@ -18,8 +18,9 @@ class OrderController extends Controller
      */
     public function index(Request $request)
     {
+        // PERBAIKAN: Mengubah 'id' menjadi 'user_id' agar memfilter berdasarkan pemilik pesanan
         $query = Order::with(['items.product.category'])
-            ->where('id', Auth::id())
+            ->where('user_id', Auth::id()) 
             ->latest();
 
         if ($request->filled('status')) {
@@ -49,9 +50,6 @@ class OrderController extends Controller
         return view('orders.show', compact('order'));
     }
 
-    /**
-     * Batalkan pesanan (hanya saat status masih pending).
-     */
     /**
      * Halaman pembayaran QRIS
      */
@@ -91,6 +89,9 @@ class OrderController extends Controller
             ->with('success', 'Bukti pembayaran berhasil dikirim! Pesanan akan diproses setelah dikonfirmasi admin.');
     }
 
+    /**
+     * Batalkan pesanan (hanya saat status masih pending).
+     */
     public function cancel(Order $order)
     {
         abort_if($order->user_id !== Auth::id(), 403);
